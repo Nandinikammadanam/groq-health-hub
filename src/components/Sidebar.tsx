@@ -139,7 +139,7 @@ export function Sidebar({ userRole = 'patient', userName = 'User', collapsed = f
           onClick={() => {
             if (window.confirm('Are you sure you want to logout?')) {
               localStorage.removeItem('healthmate-user');
-              window.location.href = '/';
+              window.location.href = '/login';
             }
           }}
           className={cn(

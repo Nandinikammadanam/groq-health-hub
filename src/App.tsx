@@ -12,6 +12,9 @@ import Appointments from "./pages/Appointments";
 import HealthRecords from "./pages/HealthRecords";
 import EducationHub from "./pages/EducationHub";
 import NotFound from "./pages/NotFound";
+import Vitals from "./pages/Vitals";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +26,8 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
           <Route path="/dashboard" element={
             <Layout userRole="patient" userName="nandini">
               <Dashboard />
@@ -51,6 +56,11 @@ const App = () => (
           <Route path="/education" element={
             <Layout userRole="patient" userName="nandini">
               <EducationHub />
+            </Layout>
+          } />
+          <Route path="/vitals" element={
+            <Layout userRole="patient" userName="nandini">
+              <Vitals />
             </Layout>
           } />
           
