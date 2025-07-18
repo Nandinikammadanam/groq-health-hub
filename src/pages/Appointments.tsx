@@ -250,7 +250,11 @@ export default function Appointments() {
                       
                       <div className="flex gap-2">
                         {appointment.type === 'video' && (
-                          <Button size="sm" className="flex items-center gap-2">
+                          <Button 
+                            size="sm" 
+                            className="flex items-center gap-2"
+                            onClick={() => window.open(`https://meet.google.com/new-meeting-${appointment.id}`, '_blank')}
+                          >
                             <Video className="w-4 h-4" />
                             Join Call
                           </Button>

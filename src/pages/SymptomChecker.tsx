@@ -41,22 +41,18 @@ export default function SymptomChecker() {
     setIsLoading(true);
 
     try {
-      // Here we'll integrate with Groq API
-      const response = await fetch('/api/groq-symptom-check', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ symptoms: inputMessage })
-      });
-
-      const data = await response.json();
+      // Import and use Groq API
+      const { GroqService } = await import('@/lib/groq');
+      const response = await GroqService.symptomChecker(inputMessage);
 
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'ai',
-        content: data.response || "Based on your symptoms, here's what I can suggest:\n\n1. **Possible causes**: The symptoms you described could be related to several conditions.\n\n2. **Severity**: This appears to be a medium-priority concern.\n\n3. **Recommendations**: I recommend consulting with a healthcare provider for proper evaluation.",
+        content: response,
         timestamp: new Date(),
         suggestions: ['Schedule a consultation', 'Monitor symptoms', 'Rest and hydration'],
-        severity: 'medium'
+        severity: response.toLowerCase().includes('emergency') ? 'high' : 
+                 response.toLowerCase().includes('urgent') ? 'medium' : 'low'
       };
 
       setMessages(prev => [...prev, aiMessage]);

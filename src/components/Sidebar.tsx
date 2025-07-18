@@ -17,8 +17,8 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-const sidebarItems = [
-  { title: "Dashboard", url: "/", icon: Home },
+const patientItems = [
+  { title: "Dashboard", url: "/dashboard", icon: Home },
   { title: "AI Symptom Checker", url: "/symptom-checker", icon: MessageSquare },
   { title: "Mental Health", url: "/mental-health", icon: Heart },
   { title: "Appointments", url: "/appointments", icon: Calendar },
@@ -54,11 +54,11 @@ export function Sidebar({ userRole = 'patient', userName = 'User', collapsed = f
   const getMenuItems = () => {
     switch (userRole) {
       case 'doctor':
-        return [...sidebarItems, ...doctorItems];
+        return doctorItems;
       case 'admin':
-        return [...sidebarItems, ...adminItems];
+        return adminItems;
       default:
-        return sidebarItems;
+        return patientItems;
     }
   };
 
@@ -136,6 +136,12 @@ export function Sidebar({ userRole = 'patient', userName = 'User', collapsed = f
         <Button
           variant="ghost"
           size="sm"
+          onClick={() => {
+            if (window.confirm('Are you sure you want to logout?')) {
+              localStorage.removeItem('healthmate-user');
+              window.location.href = '/';
+            }
+          }}
           className={cn(
             "w-full justify-start gap-3 text-muted-foreground hover:text-foreground",
             collapsed && "px-2"
