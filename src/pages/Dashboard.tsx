@@ -4,7 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-export default function Dashboard() {
+interface DashboardProps {
+  userRole?: 'patient' | 'doctor' | 'admin';
+}
+
+export default function Dashboard({ userRole = 'patient' }: DashboardProps) {
   const currentTime = new Date().getHours();
   const greeting = currentTime < 12 ? "Good morning" : currentTime < 18 ? "Good afternoon" : "Good evening";
 
@@ -34,55 +38,57 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div>
-        <h2 className="text-xl font-semibold mb-6">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-            <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 bg-health-blue rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Stethoscope className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="font-semibold mb-2">AI Symptom Checker</h3>
-              <p className="text-sm text-muted-foreground mb-4">Describe your symptoms to get AI-powered insights</p>
-              <Button size="sm" className="w-full">Get Started</Button>
-            </CardContent>
-          </Card>
+      {/* Quick Actions - Only for Patients */}
+      {userRole === 'patient' && (
+        <div>
+          <h2 className="text-xl font-semibold mb-6">Quick Actions</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+              <CardContent className="p-6 text-center">
+                <div className="w-12 h-12 bg-health-blue rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Stethoscope className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="font-semibold mb-2">AI Symptom Checker</h3>
+                <p className="text-sm text-muted-foreground mb-4">Describe your symptoms to get AI-powered insights</p>
+                <Button size="sm" className="w-full">Get Started</Button>
+              </CardContent>
+            </Card>
 
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-            <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 bg-health-purple rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Heart className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="font-semibold mb-2">Mental Health Check</h3>
-              <p className="text-sm text-muted-foreground mb-4">Chat with our AI therapist for mental wellness</p>
-              <Button size="sm" className="w-full">Get Started</Button>
-            </CardContent>
-          </Card>
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+              <CardContent className="p-6 text-center">
+                <div className="w-12 h-12 bg-health-purple rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Heart className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="font-semibold mb-2">Mental Health Check</h3>
+                <p className="text-sm text-muted-foreground mb-4">Chat with our AI therapist for mental wellness</p>
+                <Button size="sm" className="w-full">Get Started</Button>
+              </CardContent>
+            </Card>
 
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-            <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 bg-health-green rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Calendar className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="font-semibold mb-2">Book Appointment</h3>
-              <p className="text-sm text-muted-foreground mb-4">Schedule a consultation with a doctor</p>
-              <Button size="sm" className="w-full">Get Started</Button>
-            </CardContent>
-          </Card>
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+              <CardContent className="p-6 text-center">
+                <div className="w-12 h-12 bg-health-green rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Calendar className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="font-semibold mb-2">Book Appointment</h3>
+                <p className="text-sm text-muted-foreground mb-4">Schedule a consultation with a doctor</p>
+                <Button size="sm" className="w-full">Get Started</Button>
+              </CardContent>
+            </Card>
 
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-            <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 bg-health-orange rounded-lg flex items-center justify-center mx-auto mb-4">
-                <FileText className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="font-semibold mb-2">View Records</h3>
-              <p className="text-sm text-muted-foreground mb-4">Access your medical history and reports</p>
-              <Button size="sm" className="w-full">Get Started</Button>
-            </CardContent>
-          </Card>
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+              <CardContent className="p-6 text-center">
+                <div className="w-12 h-12 bg-health-orange rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <FileText className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="font-semibold mb-2">View Records</h3>
+                <p className="text-sm text-muted-foreground mb-4">Access your medical history and reports</p>
+                <Button size="sm" className="w-full">Get Started</Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Health Overview */}
       <div>

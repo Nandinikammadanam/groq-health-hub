@@ -15,6 +15,9 @@ import NotFound from "./pages/NotFound";
 import Vitals from "./pages/Vitals";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import DoctorSchedule from "./pages/DoctorSchedule";
+import AdminUsers from "./pages/AdminUsers";
+import AdminLogs from "./pages/AdminLogs";
 
 const queryClient = new QueryClient();
 
@@ -80,11 +83,26 @@ const App = () => (
               <HealthRecords />
             </Layout>
           } />
+          <Route path="/doctor/schedule" element={
+            <Layout userRole="doctor" userName="Dr. Sarah Johnson">
+              <DoctorSchedule />
+            </Layout>
+          } />
           
           {/* Admin Routes */}
           <Route path="/admin" element={
             <Layout userRole="admin" userName="Admin User">
               <Dashboard />
+            </Layout>
+          } />
+          <Route path="/admin/users" element={
+            <Layout userRole="admin" userName="Admin User">
+              <AdminUsers />
+            </Layout>
+          } />
+          <Route path="/admin/logs" element={
+            <Layout userRole="admin" userName="Admin User">
+              <AdminLogs />
             </Layout>
           } />
           

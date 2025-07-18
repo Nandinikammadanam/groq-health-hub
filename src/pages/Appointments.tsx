@@ -254,10 +254,8 @@ export default function Appointments() {
                             size="sm" 
                             className="flex items-center gap-2"
                             onClick={() => {
-                              // Generate proper Google Meet URL with meeting code
-                              const meetingCode = `healthmate-${appointment.id}-${Math.random().toString(36).substr(2, 9)}`;
-                              const meetUrl = `https://meet.google.com/${meetingCode.replace(/[^a-z0-9-]/g, '')}`;
-                              window.open(meetUrl, '_blank');
+                              // Open Google Meet with a new meeting
+                              window.open('https://meet.google.com/new', '_blank');
                             }}
                           >
                             <Video className="w-4 h-4" />
