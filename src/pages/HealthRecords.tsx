@@ -3,9 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Upload, Download, Eye, Calendar, Activity } from "lucide-react";
+import { FileText, Upload, Download, Eye, Calendar, Activity, FileDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 interface HealthRecord {
   id: string;
@@ -49,6 +51,9 @@ export default function HealthRecords() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [recordTitle, setRecordTitle] = useState("");
   const [recordType, setRecordType] = useState<HealthRecord['type']>('lab');
+  const [viewingRecord, setViewingRecord] = useState<HealthRecord | null>(null);
+  const [generatedSummary, setGeneratedSummary] = useState("");
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -102,6 +107,61 @@ export default function HealthRecords() {
     };
     const Icon = icons[type];
     return <Icon className="w-4 h-4" />;
+  };
+
+  const generateSummary = async () => {
+    setIsGeneratingSummary(true);
+    
+    // Simulate AI summary generation
+    setTimeout(() => {
+      const summary = `PATIENT SUMMARY - ${new Date().toLocaleDateString()}\n\nTotal Records: ${records.length}\n\nRecent Activity:\n${records.slice(0, 3).map(r => `• ${r.title} (${r.date})`).join('\n')}\n\nRecommendations:\n• Regular follow-up appointments\n• Continue current medication regimen\n• Monitor vital signs weekly`;
+      
+      setGeneratedSummary(summary);
+      setIsGeneratingSummary(false);
+      
+      toast({
+        title: "Summary Generated",
+        description: "Patient summary has been generated successfully.",
+      });
+    }, 2000);
+  };
+
+  const exportAllRecords = () => {
+    const csvContent = [
+      'Title,Type,Date,Provider,Summary',
+      ...records.map(r => `"${r.title}","${r.type}","${r.date}","${r.provider || ''}","${r.summary || ''}"`)
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `health-records-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Records Exported",
+      description: "All health records have been exported to CSV.",
+    });
+  };
+
+  const viewRecord = (record: HealthRecord) => {
+    setViewingRecord(record);
+  };
+
+  const downloadRecord = (record: HealthRecord) => {
+    if (record.fileUrl) {
+      const a = document.createElement('a');
+      a.href = record.fileUrl;
+      a.download = `${record.title}.pdf`;
+      a.click();
+      
+      toast({
+        title: "Download Started",
+        description: "Record file download has started.",
+      });
+    }
   };
 
   // Different views for different user roles
@@ -212,12 +272,20 @@ export default function HealthRecords() {
                 </div>
 
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => viewRecord(record)}
+                  >
                     <Eye className="w-4 h-4 mr-1" />
                     View
                   </Button>
                   {record.fileUrl && (
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => downloadRecord(record)}
+                    >
                       <Download className="w-4 h-4 mr-1" />
                       Download
                     </Button>
@@ -237,15 +305,24 @@ export default function HealthRecords() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Button variant="outline" className="h-20 flex-col">
+              <Button 
+                variant="outline" 
+                className="h-20 flex-col"
+                onClick={generateSummary}
+                disabled={isGeneratingSummary}
+              >
                 <FileText className="w-6 h-6 mb-2" />
-                Generate Summary
+                {isGeneratingSummary ? "Generating..." : "Generate Summary"}
               </Button>
               <Button variant="outline" className="h-20 flex-col">
                 <Upload className="w-6 h-6 mb-2" />
                 Upload Patient Record
               </Button>
-              <Button variant="outline" className="h-20 flex-col">
+              <Button 
+                variant="outline" 
+                className="h-20 flex-col"
+                onClick={exportAllRecords}
+              >
                 <Download className="w-6 h-6 mb-2" />
                 Export All Records
               </Button>
@@ -253,6 +330,101 @@ export default function HealthRecords() {
           </CardContent>
         </Card>
       )}
+
+      {/* Patient-specific Export */}
+      {isPatient && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Export Options</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={exportAllRecords} className="w-full">
+              <FileDown className="w-4 h-4 mr-2" />
+              Export All My Records
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* View Record Dialog */}
+      <Dialog open={!!viewingRecord} onOpenChange={() => setViewingRecord(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{viewingRecord?.title}</DialogTitle>
+          </DialogHeader>
+          {viewingRecord && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Type</label>
+                  <p className="text-sm text-muted-foreground">{viewingRecord.type}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Date</label>
+                  <p className="text-sm text-muted-foreground">{viewingRecord.date}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Provider</label>
+                  <p className="text-sm text-muted-foreground">{viewingRecord.provider}</p>
+                </div>
+              </div>
+              {viewingRecord.summary && (
+                <div>
+                  <label className="text-sm font-medium">Summary</label>
+                  <p className="text-sm text-muted-foreground mt-1">{viewingRecord.summary}</p>
+                </div>
+              )}
+              {viewingRecord.fileUrl && (
+                <div className="flex gap-2">
+                  <Button onClick={() => downloadRecord(viewingRecord)}>
+                    <Download className="w-4 h-4 mr-2" />
+                    Download File
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Generated Summary Dialog */}
+      <Dialog open={!!generatedSummary} onOpenChange={() => setGeneratedSummary("")}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Generated Patient Summary</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Textarea
+              value={generatedSummary}
+              readOnly
+              className="min-h-[300px]"
+            />
+            <div className="flex gap-2">
+              <Button onClick={() => {
+                navigator.clipboard.writeText(generatedSummary);
+                toast({
+                  title: "Copied to Clipboard",
+                  description: "Summary has been copied to clipboard.",
+                });
+              }}>
+                Copy to Clipboard
+              </Button>
+              <Button variant="outline" onClick={() => {
+                const blob = new Blob([generatedSummary], { type: 'text/plain' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `patient-summary-${new Date().toISOString().split('T')[0]}.txt`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+              }}>
+                <Download className="w-4 h-4 mr-2" />
+                Download Summary
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

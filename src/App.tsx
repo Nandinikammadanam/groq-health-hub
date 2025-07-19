@@ -18,6 +18,7 @@ import Signup from "./pages/Signup";
 import DoctorSchedule from "./pages/DoctorSchedule";
 import AdminUsers from "./pages/AdminUsers";
 import AdminLogs from "./pages/AdminLogs";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -103,6 +104,23 @@ const App = () => (
           <Route path="/admin/logs" element={
             <Layout userRole="admin" userName="Admin User">
               <AdminLogs />
+            </Layout>
+          } />
+
+          {/* Settings Routes for all roles */}
+          <Route path="/settings" element={
+            <Layout userRole="patient" userName="nandini">
+              <Settings />
+            </Layout>
+          } />
+          <Route path="/doctor/settings" element={
+            <Layout userRole="doctor" userName="Dr. Sarah Johnson">
+              <Settings />
+            </Layout>
+          } />
+          <Route path="/admin/settings" element={
+            <Layout userRole="admin" userName="Admin User">
+              <Settings />
             </Layout>
           } />
           

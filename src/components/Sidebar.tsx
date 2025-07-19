@@ -122,17 +122,20 @@ export function Sidebar({ userRole = 'patient', userName = 'User', collapsed = f
 
       {/* Settings & Logout */}
       <div className="p-4 border-t border-border space-y-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          className={cn(
-            "w-full justify-start gap-3 text-muted-foreground hover:text-foreground",
-            collapsed && "px-2"
-          )}
+        <NavLink
+          to={userRole === 'doctor' ? '/doctor/settings' : userRole === 'admin' ? '/admin/settings' : '/settings'}
+          className={({ isActive }) =>
+            cn(
+              "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm",
+              isActive
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            )
+          }
         >
           <Settings className="w-4 h-4" />
           {!collapsed && <span>Settings</span>}
-        </Button>
+        </NavLink>
         <Button
           variant="ghost"
           size="sm"
