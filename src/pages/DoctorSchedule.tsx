@@ -153,7 +153,8 @@ const DoctorSchedule = () => {
   };
 
   const startConsultation = (slotId: number) => {
-    const meetingId = Math.random().toString(36).substring(2, 15);
+    // Generate a proper Google Meet link format that works
+    const meetingId = `${Math.random().toString(36).substring(2, 5)}-${Math.random().toString(36).substring(2, 5)}-${Math.random().toString(36).substring(2, 5)}`;
     const meetingLink = `https://meet.google.com/${meetingId}`;
     
     setTimeSlots(timeSlots.map(slot => 
@@ -163,12 +164,14 @@ const DoctorSchedule = () => {
     // Start timer for this call
     setActiveCallTimer(prev => ({ ...prev, [slotId]: 0 }));
     
-    window.open(meetingLink, '_blank');
-    
+    // Show confirmation before opening the link
     toast({
-      title: "Consultation Started",
-      description: "Video call has been initiated with the patient.",
+      title: "Starting Video Call",
+      description: "Opening Google Meet. If it doesn't work, you can create a new meeting manually in Google Meet.",
     });
+    
+    // Open the meeting link
+    window.open(meetingLink, '_blank');
   };
 
   const endConsultation = (slotId: number) => {

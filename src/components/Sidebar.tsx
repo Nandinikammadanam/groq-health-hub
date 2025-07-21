@@ -29,7 +29,6 @@ const patientItems = [
 
 const doctorItems = [
   { title: "Doctor Dashboard", url: "/doctor", icon: Stethoscope },
-  { title: "Consultations", url: "/doctor/consultations", icon: MessageSquare },
   { title: "Patients", url: "/doctor/patients", icon: Users },
   { title: "Schedule", url: "/doctor/schedule", icon: Calendar },
 ];
