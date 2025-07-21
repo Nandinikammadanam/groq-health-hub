@@ -26,16 +26,16 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 
 const Settings = () => {
-  const { user, profile: userProfile } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   
   const [profile, setProfile] = useState({
-    name: userProfile?.full_name || "",
-    email: userProfile?.email || "",
-    phone: userProfile?.phone || "",
-    location: userProfile?.address || "",
+    name: user?.name || "",
+    email: user?.email || "",
+    phone: "",
+    location: "",
     bio: "",
-    avatar: userProfile?.avatar_url || ""
+    avatar: ""
   });
 
   const [notifications, setNotifications] = useState({
