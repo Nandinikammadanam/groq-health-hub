@@ -15,7 +15,7 @@ export default function Signup() {
   const { toast } = useToast();
   
   const [formData, setFormData] = useState({
-    name: '',
+    fullName: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -49,13 +49,13 @@ export default function Signup() {
     setIsLoading(true);
 
     try {
-      const success = await signup(formData.name, formData.email, formData.password, formData.role);
+      const result = await signup(formData.email, formData.password, formData.fullName, formData.role);
       
-      if (success) {
+      if (!result.error) {
         setSignupSuccess(true);
         toast({
           title: "Account created successfully!",
-          description: `Welcome to HealthMate AI, ${formData.name}!`,
+          description: `Welcome to HealthMate AI, ${formData.fullName}!`,
         });
         
         // Show success for 2 seconds then redirect
@@ -74,7 +74,7 @@ export default function Signup() {
       } else {
         toast({
           title: "Signup failed",
-          description: "Unable to create account. Please try again.",
+          description: result.error || "Unable to create account. Please try again.",
           variant: "destructive",
         });
       }
@@ -147,13 +147,13 @@ export default function Signup() {
                 <TabsContent key={role} value={role} className="space-y-4 mt-6">
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                      <Label htmlFor="name">Full Name</Label>
+                      <Label htmlFor="fullName">Full Name</Label>
                       <Input
-                        id="name"
+                        id="fullName"
                         type="text"
                         placeholder="Enter your full name"
-                        value={formData.name}
-                        onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                        value={formData.fullName}
+                        onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
                         required
                       />
                     </div>
