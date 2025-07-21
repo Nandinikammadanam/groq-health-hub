@@ -153,25 +153,22 @@ const DoctorSchedule = () => {
   };
 
   const startConsultation = (slotId: number) => {
-    // Generate a proper Google Meet link format that works
-    const meetingId = `${Math.random().toString(36).substring(2, 5)}-${Math.random().toString(36).substring(2, 5)}-${Math.random().toString(36).substring(2, 5)}`;
-    const meetingLink = `https://meet.google.com/${meetingId}`;
-    
+    // Update status first
     setTimeSlots(timeSlots.map(slot => 
-      slot.id === slotId ? { ...slot, meetingLink, status: "in-progress" } : slot
+      slot.id === slotId ? { ...slot, status: "in-progress" } : slot
     ));
     
     // Start timer for this call
     setActiveCallTimer(prev => ({ ...prev, [slotId]: 0 }));
     
-    // Show confirmation before opening the link
+    // Show instructions for creating a proper meeting
     toast({
-      title: "Starting Video Call",
-      description: "Opening Google Meet. If it doesn't work, you can create a new meeting manually in Google Meet.",
+      title: "Video Call Instructions",
+      description: "Please create a new meeting in Google Meet and share the link with your patient. Supabase integration coming soon for automated meeting creation!",
     });
     
-    // Open the meeting link
-    window.open(meetingLink, '_blank');
+    // Open Google Meet homepage for manual meeting creation
+    window.open('https://meet.google.com/new', '_blank');
   };
 
   const endConsultation = (slotId: number) => {
