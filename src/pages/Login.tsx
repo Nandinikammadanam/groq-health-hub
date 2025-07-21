@@ -27,9 +27,9 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const success = await login(formData.email, formData.password, formData.role);
+      const result = await login(formData.email, formData.password);
       
-      if (success) {
+      if (!result.error) {
         toast({
           title: "Login successful!",
           description: `Welcome back!`,
@@ -49,7 +49,7 @@ export default function Login() {
       } else {
         toast({
           title: "Login failed",
-          description: "Invalid credentials. Please try again.",
+          description: result.error || "Invalid credentials. Please try again.",
           variant: "destructive",
         });
       }
