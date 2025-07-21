@@ -264,7 +264,17 @@ export default function EducationHub() {
                   <Clock className="w-3 h-3" />
                   {article.readTime} min read
                 </div>
-                <Button size="sm">Read More</Button>
+                <Button 
+                  size="sm"
+                  onClick={() => {
+                    toast({
+                      title: "Article Content",
+                      description: `Full content for: ${article.title}`,
+                    });
+                  }}
+                >
+                  Read More
+                </Button>
               </div>
             </CardContent>
           </Card>
