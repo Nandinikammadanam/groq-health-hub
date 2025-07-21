@@ -22,6 +22,27 @@ interface HealthRecord {
   provider?: string;
 }
 
+interface Patient {
+  id: string;
+  name: string;
+  age: number;
+  gender: 'male' | 'female' | 'other';
+  phone: string;
+  email: string;
+  address: string;
+  conditions: string[];
+  lastVisit: string;
+  nextAppointment?: string;
+  photo?: any;
+  visits: {
+    id: string;
+    date: string;
+    type: string;
+    notes: string;
+    diagnosis: string;
+  }[];
+}
+
 const mockRecords: HealthRecord[] = [
   {
     id: '1',
@@ -50,12 +71,12 @@ const mockRecords: HealthRecord[] = [
 ];
 
 // Mock patients data for doctor view
-const mockPatients = [
+const mockPatients: Patient[] = [
   {
     id: '1',
     name: 'John Doe',
     age: 45,
-    gender: 'male' as const,
+    gender: 'male',
     phone: '+1 (555) 123-4567',
     email: 'john.doe@email.com',
     address: '123 Main St, Springfield, IL',
@@ -84,7 +105,7 @@ const mockPatients = [
     id: '2',
     name: 'Sarah Wilson',
     age: 32,
-    gender: 'female' as const,
+    gender: 'female',
     phone: '+1 (555) 987-6543', 
     email: 'sarah.wilson@email.com',
     address: '456 Oak Ave, Springfield, IL',
@@ -105,7 +126,7 @@ const mockPatients = [
     id: '3',
     name: 'Mike Johnson',
     age: 28,
-    gender: 'male' as const,
+    gender: 'male',
     phone: '+1 (555) 456-7890',
     email: 'mike.johnson@email.com', 
     address: '789 Pine St, Springfield, IL',
@@ -126,7 +147,7 @@ const mockPatients = [
 
 export default function HealthRecords() {
   const [records, setRecords] = useState<HealthRecord[]>(mockRecords);
-  const [patients, setPatients] = useState(mockPatients);
+  const [patients, setPatients] = useState<Patient[]>(mockPatients);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [recordTitle, setRecordTitle] = useState("");
   const [recordType, setRecordType] = useState<HealthRecord['type']>('lab');
@@ -299,7 +320,7 @@ export default function HealthRecords() {
     });
   };
 
-  const updatePatient = (updatedPatient: typeof patients[0]) => {
+  const updatePatient = (updatedPatient: Patient) => {
     setPatients(patients.map(p => p.id === updatedPatient.id ? updatedPatient : p));
   };
 
