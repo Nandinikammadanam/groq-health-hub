@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Book, Search, TrendingUp, Clock, Heart, Brain, Activity } from "lucide-react";
 import { GroqService } from "@/lib/groq";
 import { useToast } from "@/hooks/use-toast";
+import { ArticleModal } from "@/components/ArticleModal";
 
 interface Article {
   id: string;
@@ -264,17 +265,14 @@ export default function EducationHub() {
                   <Clock className="w-3 h-3" />
                   {article.readTime} min read
                 </div>
-                <Button 
-                  size="sm"
-                  onClick={() => {
-                    toast({
-                      title: "Article Content",
-                      description: `Full content for: ${article.title}`,
-                    });
-                  }}
-                >
-                  Read More
-                </Button>
+                <ArticleModal 
+                  article={article}
+                  trigger={
+                    <Button size="sm">
+                      Read More
+                    </Button>
+                  }
+                />
               </div>
             </CardContent>
           </Card>

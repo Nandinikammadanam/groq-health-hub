@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,14 +61,38 @@ const Settings = () => {
     dateFormat: "MM/DD/YYYY"
   });
 
+  // Load settings from localStorage on component mount
+  useEffect(() => {
+    const savedProfile = localStorage.getItem('userProfile');
+    const savedNotifications = localStorage.getItem('userNotifications');
+    const savedPrivacy = localStorage.getItem('userPrivacy');
+    const savedAppearance = localStorage.getItem('userAppearance');
+
+    if (savedProfile) setProfile(JSON.parse(savedProfile));
+    if (savedNotifications) setNotifications(JSON.parse(savedNotifications));
+    if (savedPrivacy) setPrivacy(JSON.parse(savedPrivacy));
+    if (savedAppearance) {
+      const appearance = JSON.parse(savedAppearance);
+      setAppearance(appearance);
+      // Apply dark mode immediately
+      if (appearance.darkMode) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  }, []);
+
   const saveProfile = () => {
+    localStorage.setItem('userProfile', JSON.stringify(profile));
     toast({
       title: "Profile Updated",
-      description: "Your profile has been updated successfully.",
+      description: "Your profile has been updated and saved successfully.",
     });
   };
 
   const saveNotifications = () => {
+    localStorage.setItem('userNotifications', JSON.stringify(notifications));
     toast({
       title: "Notification Settings Updated",
       description: "Your notification preferences have been saved.",
@@ -76,6 +100,7 @@ const Settings = () => {
   };
 
   const savePrivacy = () => {
+    localStorage.setItem('userPrivacy', JSON.stringify(privacy));
     toast({
       title: "Privacy Settings Updated",
       description: "Your privacy settings have been saved.",
@@ -83,9 +108,16 @@ const Settings = () => {
   };
 
   const saveAppearance = () => {
+    localStorage.setItem('userAppearance', JSON.stringify(appearance));
+    // Apply dark mode immediately
+    if (appearance.darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
     toast({
       title: "Appearance Settings Updated",
-      description: "Your appearance preferences have been saved.",
+      description: "Your appearance preferences have been saved and applied.",
     });
   };
 
