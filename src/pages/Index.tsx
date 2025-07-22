@@ -3,7 +3,7 @@ import Dashboard from "./Dashboard";
 
 const Index = () => {
   return (
-    <Layout userRole="patient" userName="nandini">
+    <Layout>
       <Dashboard />
     </Layout>
   );

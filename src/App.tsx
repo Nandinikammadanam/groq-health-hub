@@ -68,49 +68,49 @@ const App = () => {
             {/* Patient Routes */}
             <Route path="/dashboard" element={
               <ProtectedRoute allowedRoles={['patient']}>
-                <Layout userRole="patient" userName="Patient">
+                <Layout>
                   <Dashboard />
                 </Layout>
               </ProtectedRoute>
             } />
             <Route path="/symptom-checker" element={
               <ProtectedRoute allowedRoles={['patient']}>
-                <Layout userRole="patient" userName="Patient">
+                <Layout>
                   <SymptomChecker />
                 </Layout>
               </ProtectedRoute>
             } />
             <Route path="/mental-health" element={
               <ProtectedRoute allowedRoles={['patient']}>
-                <Layout userRole="patient" userName="Patient">
+                <Layout>
                   <MentalHealth />
                 </Layout>
               </ProtectedRoute>
             } />
             <Route path="/appointments" element={
               <ProtectedRoute allowedRoles={['patient']}>
-                <Layout userRole="patient" userName="Patient">
+                <Layout>
                   <Appointments />
                 </Layout>
               </ProtectedRoute>
             } />
             <Route path="/records" element={
               <ProtectedRoute allowedRoles={['patient']}>
-                <Layout userRole="patient" userName="Patient">
+                <Layout>
                   <HealthRecords />
                 </Layout>
               </ProtectedRoute>
             } />
             <Route path="/education" element={
               <ProtectedRoute allowedRoles={['patient']}>
-                <Layout userRole="patient" userName="Patient">
+                <Layout>
                   <EducationHub />
                 </Layout>
               </ProtectedRoute>
             } />
             <Route path="/vitals" element={
               <ProtectedRoute allowedRoles={['patient']}>
-                <Layout userRole="patient" userName="Patient">
+                <Layout>
                   <Vitals />
                 </Layout>
               </ProtectedRoute>
@@ -119,21 +119,21 @@ const App = () => {
             {/* Doctor Routes */}
             <Route path="/doctor" element={
               <ProtectedRoute allowedRoles={['doctor']}>
-                <Layout userRole="doctor" userName="Doctor">
+                <Layout>
                   <Dashboard />
                 </Layout>
               </ProtectedRoute>
             } />
             <Route path="/doctor/schedule" element={
               <ProtectedRoute allowedRoles={['doctor']}>
-                <Layout userRole="doctor" userName="Doctor">
+                <Layout>
                   <DoctorSchedule />
                 </Layout>
               </ProtectedRoute>
             } />
             <Route path="/doctor/patients" element={
               <ProtectedRoute allowedRoles={['doctor']}>
-                <Layout userRole="doctor" userName="Doctor">
+                <Layout>
                   <HealthRecords />
                 </Layout>
               </ProtectedRoute>
@@ -142,21 +142,21 @@ const App = () => {
             {/* Admin Routes */}
             <Route path="/admin" element={
               <ProtectedRoute allowedRoles={['admin']}>
-                <Layout userRole="admin" userName="Admin">
+                <Layout>
                   <Dashboard />
                 </Layout>
               </ProtectedRoute>
             } />
             <Route path="/admin/users" element={
               <ProtectedRoute allowedRoles={['admin']}>
-                <Layout userRole="admin" userName="Admin">
+                <Layout>
                   <AdminUsers />
                 </Layout>
               </ProtectedRoute>
             } />
             <Route path="/admin/logs" element={
               <ProtectedRoute allowedRoles={['admin']}>
-                <Layout userRole="admin" userName="Admin">
+                <Layout>
                   <AdminLogs />
                 </Layout>
               </ProtectedRoute>
@@ -165,7 +165,7 @@ const App = () => {
             {/* Settings Routes for all authenticated users */}
             <Route path="/settings" element={
               <ProtectedRoute>
-                <Layout userRole="patient" userName="User">
+                <Layout>
                   <Settings />
                 </Layout>
               </ProtectedRoute>
