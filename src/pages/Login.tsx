@@ -1,51 +1,51 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { Heart, Stethoscope, Shield } from "lucide-react";
+import { Heart } from "lucide-react";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, profile, isAuthenticated } = useAuth();
   const { toast } = useToast();
   
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    role: 'patient' as 'patient' | 'doctor' | 'admin'
-  });
-  
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated && profile) {
+      switch (profile.role) {
+        case 'doctor':
+          navigate('/doctor');
+          break;
+        case 'admin':
+          navigate('/admin');
+          break;
+        default:
+          navigate('/dashboard');
+      }
+    }
+  }, [isAuthenticated, profile, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const result = await login(formData.email, formData.password);
+      const result = await login(email, password);
       
       if (!result.error) {
         toast({
           title: "Login successful!",
-          description: `Welcome back!`,
+          description: "Welcome back!",
         });
-        
-        // Redirect based on role
-        switch (formData.role) {
-          case 'doctor':
-            navigate('/doctor');
-            break;
-          case 'admin':
-            navigate('/admin');
-            break;
-          default:
-            navigate('/dashboard');
-        }
+        // Navigation will be handled by the useEffect above
       } else {
         toast({
           title: "Login failed",
@@ -61,18 +61,6 @@ export default function Login() {
       });
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleQuickLogin = (email: string, password: string, role: 'patient' | 'doctor' | 'admin') => {
-    setFormData({ email, password, role });
-  };
-
-  const getRoleIcon = (role: string) => {
-    switch (role) {
-      case 'patient': return <Heart className="w-5 h-5" />;
-      case 'doctor': return <Stethoscope className="w-5 h-5" />;
-      case 'admin': return <Shield className="w-5 h-5" />;
     }
   };
 
@@ -95,148 +83,35 @@ export default function Login() {
             <CardTitle>Welcome Back</CardTitle>
           </CardHeader>
           <CardContent>
-            <Tabs value={formData.role} onValueChange={(value: any) => setFormData(prev => ({ ...prev, role: value }))}>
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="patient" className="flex items-center gap-1">
-                  <Heart className="w-4 h-4" />
-                  Patient
-                </TabsTrigger>
-                <TabsTrigger value="doctor" className="flex items-center gap-1">
-                  <Stethoscope className="w-4 h-4" />
-                  Doctor
-                </TabsTrigger>
-                <TabsTrigger value="admin" className="flex items-center gap-1">
-                  <Shield className="w-4 h-4" />
-                  Admin
-                </TabsTrigger>
-              </TabsList>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
 
-              <TabsContent value="patient" className="space-y-4 mt-6">
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="Enter your email"
-                      value={formData.email}
-                      onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                      required
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="password">Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="Enter your password"
-                      value={formData.password}
-                      onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                      required
-                    />
-                  </div>
-
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Signing in..." : "Sign In as Patient"}
-                  </Button>
-                </form>
-                
-                <div className="text-center">
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={() => handleQuickLogin('nandini@gmail.com', 'password', 'patient')}
-                  >
-                    Quick Login (Demo Patient)
-                  </Button>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="doctor" className="space-y-4 mt-6">
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="Enter your email"
-                      value={formData.email}
-                      onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                      required
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="password">Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="Enter your password"
-                      value={formData.password}
-                      onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                      required
-                    />
-                  </div>
-
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Signing in..." : "Sign In as Doctor"}
-                  </Button>
-                </form>
-                
-                <div className="text-center">
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={() => handleQuickLogin('sarah@healthmate.com', 'password', 'doctor')}
-                  >
-                    Quick Login (Demo Doctor)
-                  </Button>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="admin" className="space-y-4 mt-6">
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="Enter your email"
-                      value={formData.email}
-                      onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                      required
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="password">Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="Enter your password"
-                      value={formData.password}
-                      onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                      required
-                    />
-                  </div>
-
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Signing in..." : "Sign In as Admin"}
-                  </Button>
-                </form>
-                
-                <div className="text-center">
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={() => handleQuickLogin('admin@healthmate.com', 'password', 'admin')}
-                  >
-                    Quick Login (Demo Admin)
-                  </Button>
-                </div>
-              </TabsContent>
-            </Tabs>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Signing in..." : "Sign In"}
+              </Button>
+            </form>
 
             <div className="mt-6 text-center text-sm">
               <span className="text-muted-foreground">Don't have an account? </span>
