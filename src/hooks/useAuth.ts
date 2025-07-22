@@ -26,7 +26,7 @@ interface AuthState {
   initialize: () => Promise<void>;
   login: (email: string, password: string) => Promise<{ error?: string }>;
   logout: () => Promise<void>;
-  signup: (email: string, password: string, fullName: string, role: 'patient' | 'doctor' | 'admin') => Promise<{ error?: string }>;
+  signup: (email: string, password: string, fullName: string, role: 'patient' | 'doctor' | 'admin', additionalData?: any) => Promise<{ error?: string }>;
   updateProfile: (updates: Partial<Profile>) => Promise<{ error?: string }>;
 }
 
@@ -121,7 +121,7 @@ export const useAuth = create<AuthState>((set, get) => ({
     });
   },
 
-  signup: async (email: string, password: string, fullName: string, role: 'patient' | 'doctor' | 'admin') => {
+  signup: async (email: string, password: string, fullName: string, role: 'patient' | 'doctor' | 'admin', additionalData?: any) => {
     try {
       const redirectUrl = `${window.location.origin}/`;
       
@@ -133,6 +133,12 @@ export const useAuth = create<AuthState>((set, get) => ({
           data: {
             full_name: fullName,
             role: role,
+            phone: additionalData?.phone,
+            date_of_birth: additionalData?.dateOfBirth,
+            address: additionalData?.address,
+            emergency_contact: additionalData?.emergencyContact,
+            medical_license: additionalData?.medicalLicense,
+            specialization: additionalData?.specialization,
           },
         },
       });
