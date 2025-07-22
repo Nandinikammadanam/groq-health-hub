@@ -54,11 +54,7 @@ const DoctorSchedule = () => {
   const [showPatientInfo, setShowPatientInfo] = useState(false);
   const [selectedSlots, setSelectedSlots] = useState<number[]>([]);
   const [activeCallTimer, setActiveCallTimer] = useState<{[key: number]: number}>({});
-  const [aiSuggestions] = useState([
-    "Follow-up with John Doe for blood pressure medication",
-    "Schedule Sarah Wilson for pulmonary function test",
-    "Mike Johnson missed last appointment - recommend rescheduling"
-  ]);
+  const [aiSuggestions] = useState([]);
   
   const { toast } = useToast();
 

@@ -138,10 +138,16 @@ export function Sidebar({ userRole = 'patient', userName = 'User', collapsed = f
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => {
+          onClick={async () => {
             if (window.confirm('Are you sure you want to logout?')) {
-              localStorage.removeItem('healthmate-user');
-              window.location.href = '/login';
+              try {
+                const { useAuth } = await import('@/hooks/useAuth');
+                const { logout } = useAuth.getState();
+                await logout();
+              } catch (error) {
+                console.error('Logout error:', error);
+                window.location.href = '/login';
+              }
             }
           }}
           className={cn(

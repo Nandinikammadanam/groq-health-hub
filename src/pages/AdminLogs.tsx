@@ -8,53 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from "@/hooks/use-toast";
 
 const AdminLogs = () => {
-  const [logs, setLogs] = useState([
-    {
-      id: 1,
-      timestamp: "2025-07-18 11:45:23",
-      level: "info",
-      action: "User Login",
-      user: "john.doe@example.com",
-      details: "Successful authentication",
-      ip: "192.168.1.100"
-    },
-    {
-      id: 2,
-      timestamp: "2025-07-18 11:44:15",
-      level: "warning",
-      action: "Failed Login Attempt",
-      user: "unknown@example.com",
-      details: "Invalid credentials",
-      ip: "192.168.1.200"
-    },
-    {
-      id: 3,
-      timestamp: "2025-07-18 11:43:02",
-      level: "success",
-      action: "Appointment Scheduled",
-      user: "sarah.wilson@example.com",
-      details: "Appointment with Dr. Johnson",
-      ip: "192.168.1.150"
-    },
-    {
-      id: 4,
-      timestamp: "2025-07-18 11:40:30",
-      level: "error",
-      action: "Database Connection Failed",
-      user: "system",
-      details: "Connection timeout after 30 seconds",
-      ip: "localhost"
-    },
-    {
-      id: 5,
-      timestamp: "2025-07-18 11:39:45",
-      level: "info",
-      action: "Health Record Updated",
-      user: "emma.brown@example.com",
-      details: "Lab results uploaded",
-      ip: "192.168.1.175"
-    }
-  ]);
+  const [logs, setLogs] = useState([]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [levelFilter, setLevelFilter] = useState("all");
@@ -173,7 +127,7 @@ const AdminLogs = () => {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">15,847</div>
+            <div className="text-2xl font-bold">0</div>
             <p className="text-xs text-muted-foreground">Last 24 hours</p>
           </CardContent>
         </Card>
@@ -184,8 +138,8 @@ const AdminLogs = () => {
             <AlertTriangle className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">23</div>
-            <p className="text-xs text-muted-foreground">-12% from yesterday</p>
+            <div className="text-2xl font-bold">0</div>
+            <p className="text-xs text-muted-foreground">No errors detected</p>
           </CardContent>
         </Card>
 
@@ -195,8 +149,8 @@ const AdminLogs = () => {
             <AlertTriangle className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">156</div>
-            <p className="text-xs text-muted-foreground">+8% from yesterday</p>
+            <div className="text-2xl font-bold">0</div>
+            <p className="text-xs text-muted-foreground">No warnings detected</p>
           </CardContent>
         </Card>
 
@@ -206,7 +160,7 @@ const AdminLogs = () => {
             <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">423</div>
+            <div className="text-2xl font-bold">0</div>
             <p className="text-xs text-muted-foreground">Currently online</p>
           </CardContent>
         </Card>
