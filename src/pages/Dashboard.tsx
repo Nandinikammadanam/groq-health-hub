@@ -10,12 +10,8 @@ interface DashboardProps {
   userRole?: 'patient' | 'doctor' | 'admin';
 }
 
-// Mock data for upcoming appointments
-const upcomingAppointments = [
-  { id: 1, patient: "John Doe", time: "10:00 AM", type: "Consultation" },
-  { id: 2, patient: "Sarah Wilson", time: "11:30 AM", type: "Follow-up" },
-  { id: 3, patient: "Mike Johnson", time: "2:00 PM", type: "Check-up" }
-];
+// Empty appointments for initial state
+const upcomingAppointments: any[] = [];
 
 export default function Dashboard({ userRole = 'patient' }: DashboardProps) {
   const [personalMetrics] = useState({

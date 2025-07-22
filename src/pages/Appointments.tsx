@@ -22,39 +22,10 @@ interface Appointment {
   notes?: string;
 }
 
-const mockAppointments: Appointment[] = [
-  {
-    id: '1',
-    doctorName: 'Dr. Sarah Johnson',
-    specialty: 'General Medicine',
-    date: '2024-01-20',
-    time: '10:00 AM',
-    type: 'video',
-    status: 'scheduled',
-    duration: 30,
-    notes: 'Follow-up consultation'
-  },
-  {
-    id: '2',
-    doctorName: 'Dr. Michael Chen',
-    specialty: 'Cardiology',
-    date: '2024-01-15',
-    time: '2:00 PM',
-    type: 'in-person',
-    status: 'completed',
-    duration: 45
-  }
-];
-
-const availableSlots = [
-  { date: '2024-01-22', time: '9:00 AM', doctor: 'Dr. Sarah Johnson', specialty: 'General Medicine' },
-  { date: '2024-01-22', time: '11:00 AM', doctor: 'Dr. Michael Chen', specialty: 'Cardiology' },
-  { date: '2024-01-23', time: '10:00 AM', doctor: 'Dr. Emily Davis', specialty: 'Dermatology' },
-  { date: '2024-01-23', time: '2:00 PM', doctor: 'Dr. James Wilson', specialty: 'Orthopedics' },
-];
+const initialAppointments: Appointment[] = [];
 
 export default function Appointments() {
-  const [appointments, setAppointments] = useState<Appointment[]>(mockAppointments);
+  const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments);
   const [showBookingDialog, setShowBookingDialog] = useState(false);
   const [bookingForm, setBookingForm] = useState({
     doctor: '',
@@ -317,30 +288,10 @@ export default function Appointments() {
         </TabsContent>
 
         <TabsContent value="available" className="space-y-4">
-          <div className="grid gap-4">
-            {availableSlots.map((slot, index) => (
-              <Card key={index} className="cursor-pointer hover:shadow-md transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="font-semibold">{slot.doctor}</h3>
-                      <p className="text-sm text-muted-foreground">{slot.specialty}</p>
-                      <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4" />
-                          {new Date(slot.date).toLocaleDateString()}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4" />
-                          {slot.time}
-                        </div>
-                      </div>
-                    </div>
-                    <Button>Book Now</Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="text-center py-8">
+            <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No available slots</h3>
+            <p className="text-muted-foreground">Check back later for new available appointment slots</p>
           </div>
         </TabsContent>
       </Tabs>

@@ -26,37 +26,10 @@ const categories = [
   { name: "Exercise", icon: TrendingUp, color: "bg-orange-500" },
 ];
 
-const mockArticles: Article[] = [
-  {
-    id: '1',
-    title: 'Understanding High Blood Pressure',
-    category: 'Heart Health',
-    content: 'High blood pressure is a common condition that affects millions...',
-    readTime: 5,
-    trending: true,
-    createdAt: '2024-01-15'
-  },
-  {
-    id: '2',
-    title: 'Managing Anxiety: Practical Tips',
-    category: 'Mental Health',
-    content: 'Anxiety is a normal response to stress, but when it becomes overwhelming...',
-    readTime: 7,
-    trending: true,
-    createdAt: '2024-01-14'
-  },
-  {
-    id: '3',
-    title: 'Healthy Eating for Diabetes',
-    category: 'Nutrition',
-    content: 'Managing diabetes through diet is crucial for maintaining stable blood sugar...',
-    readTime: 6,
-    createdAt: '2024-01-13'
-  }
-];
+const initialArticles: Article[] = [];
 
 export default function EducationHub() {
-  const [articles, setArticles] = useState<Article[]>(mockArticles);
+  const [articles, setArticles] = useState<Article[]>(initialArticles);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchTerm, setSearchTerm] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);

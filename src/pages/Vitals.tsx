@@ -17,34 +17,26 @@ interface VitalReading {
   notes?: string;
 }
 
-const mockVitals: VitalReading[] = [
-  { id: '1', type: 'blood_pressure', value: '120/80', unit: 'mmHg', date: '2024-01-18', time: '09:00 AM', notes: 'Morning reading' },
-  { id: '2', type: 'heart_rate', value: '72', unit: 'bpm', date: '2024-01-18', time: '09:05 AM' },
-  { id: '3', type: 'temperature', value: '98.6', unit: '°F', date: '2024-01-18', time: '09:10 AM' },
-  { id: '4', type: 'weight', value: '150', unit: 'lbs', date: '2024-01-18', time: '08:00 AM' },
-  { id: '5', type: 'blood_sugar', value: '95', unit: 'mg/dL', date: '2024-01-18', time: '08:30 AM', notes: 'Fasting' },
-  { id: '6', type: 'oxygen_saturation', value: '98', unit: '%', date: '2024-01-18', time: '09:15 AM' },
+const initialVitals: VitalReading[] = [];
+
+const bloodPressureData = [
+  { date: '2024-01-15', systolic: 0, diastolic: 0 },
+  { date: '2024-01-16', systolic: 0, diastolic: 0 },
+  { date: '2024-01-17', systolic: 0, diastolic: 0 },
+  { date: '2024-01-18', systolic: 0, diastolic: 0 },
 ];
 
 const vitalTypes = [
-  { type: 'blood_pressure', label: 'Blood Pressure', icon: Activity, unit: 'mmHg', normalRange: '90/60 - 120/80' },
-  { type: 'heart_rate', label: 'Heart Rate', icon: Heart, unit: 'bpm', normalRange: '60-100' },
-  { type: 'temperature', label: 'Temperature', icon: Thermometer, unit: '°F', normalRange: '97.8-99.1' },
+  { type: 'blood_pressure', label: 'Blood Pressure', icon: Heart, unit: 'mmHg', normalRange: '90/60 - 120/80' },
+  { type: 'heart_rate', label: 'Heart Rate', icon: Activity, unit: 'bpm', normalRange: '60-100' },
+  { type: 'temperature', label: 'Temperature', icon: Thermometer, unit: '°F', normalRange: '97-99°F' },
   { type: 'weight', label: 'Weight', icon: Scale, unit: 'lbs', normalRange: 'Varies' },
-  { type: 'blood_sugar', label: 'Blood Sugar', icon: Eye, unit: 'mg/dL', normalRange: '70-140' },
-  { type: 'oxygen_saturation', label: 'Oxygen Saturation', icon: Stethoscope, unit: '%', normalRange: '95-100' },
-];
-
-const bloodPressureData = [
-  { date: '2024-01-14', systolic: 118, diastolic: 78 },
-  { date: '2024-01-15', systolic: 122, diastolic: 82 },
-  { date: '2024-01-16', systolic: 120, diastolic: 80 },
-  { date: '2024-01-17', systolic: 115, diastolic: 75 },
-  { date: '2024-01-18', systolic: 120, diastolic: 80 },
+  { type: 'blood_sugar', label: 'Blood Sugar', icon: Eye, unit: 'mg/dL', normalRange: '70-100' },
+  { type: 'oxygen_saturation', label: 'Oxygen Saturation', icon: Stethoscope, unit: '%', normalRange: '95-100%' },
 ];
 
 export default function Vitals() {
-  const [vitals, setVitals] = useState<VitalReading[]>(mockVitals);
+  const [vitals, setVitals] = useState<VitalReading[]>(initialVitals);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [newVital, setNewVital] = useState({
     type: 'blood_pressure',

@@ -33,40 +33,7 @@ interface PatientInfo {
   lastVisit?: string;
 }
 
-const mockPatients: Record<string, PatientInfo> = {
-  "John Doe": {
-    name: "John Doe",
-    age: 45,
-    phone: "+1 (555) 123-4567",
-    email: "john.doe@email.com",
-    conditions: ["Hypertension", "Diabetes"],
-    lastVisit: "2024-01-10"
-  },
-  "Sarah Wilson": {
-    name: "Sarah Wilson", 
-    age: 32,
-    phone: "+1 (555) 987-6543",
-    email: "sarah.wilson@email.com",
-    conditions: ["Asthma"],
-    lastVisit: "2024-01-05"
-  },
-  "Mike Johnson": {
-    name: "Mike Johnson",
-    age: 28,
-    phone: "+1 (555) 456-7890", 
-    email: "mike.johnson@email.com",
-    conditions: ["Anxiety"],
-    lastVisit: "2023-12-15"
-  },
-  "Emma Brown": {
-    name: "Emma Brown",
-    age: 55,
-    phone: "+1 (555) 321-0987",
-    email: "emma.brown@email.com", 
-    conditions: ["Hypertension", "High Cholesterol"],
-    lastVisit: "2024-01-08"
-  }
-};
+const initialPatients: Record<string, PatientInfo> = {};
 
 const DoctorSchedule = () => {
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([
@@ -268,7 +235,7 @@ const DoctorSchedule = () => {
   };
 
   const showPatientDetails = (patientName: string) => {
-    const patient = mockPatients[patientName];
+    const patient = initialPatients[patientName];
     if (patient) {
       setSelectedPatient(patient);
       setShowPatientInfo(true);
