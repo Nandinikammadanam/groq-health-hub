@@ -23,7 +23,7 @@ export default function Login() {
       console.log('Redirecting user with role:', profile.role);
       switch (profile.role) {
         case 'doctor':
-          navigate('/doctor-schedule');
+          navigate('/doctor/schedule');
           break;
         case 'admin':
           navigate('/admin/users');
