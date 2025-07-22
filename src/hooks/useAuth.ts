@@ -47,15 +47,19 @@ export const useAuth = create<AuthState>((set, get) => ({
           if (session?.user) {
             // Defer Supabase calls to avoid deadlock
             setTimeout(async () => {
-              const { data: profile } = await supabase
+              const { data: profile, error } = await supabase
                 .from('profiles')
                 .select('*')
                 .eq('id', session.user.id)
-                .single();
+                .maybeSingle();
+              
+              if (error) {
+                console.error('Error fetching profile:', error);
+              }
               
               set({ 
                 profile, 
-                isAuthenticated: true,
+                isAuthenticated: !!profile,
                 isLoading: false 
               });
             }, 0);
@@ -72,17 +76,21 @@ export const useAuth = create<AuthState>((set, get) => ({
       // Check for existing session
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        const { data: profile } = await supabase
+        const { data: profile, error } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', session.user.id)
-          .single();
+          .maybeSingle();
+        
+        if (error) {
+          console.error('Error fetching profile:', error);
+        }
         
         set({ 
           session,
           user: session.user,
           profile,
-          isAuthenticated: true,
+          isAuthenticated: !!profile,
           isLoading: false 
         });
       } else {

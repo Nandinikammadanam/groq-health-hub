@@ -20,12 +20,13 @@ export default function Login() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && profile) {
+      console.log('Redirecting user with role:', profile.role);
       switch (profile.role) {
         case 'doctor':
-          navigate('/doctor');
+          navigate('/doctor-schedule');
           break;
         case 'admin':
-          navigate('/admin');
+          navigate('/admin/users');
           break;
         default:
           navigate('/dashboard');
