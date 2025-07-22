@@ -15,9 +15,9 @@ const upcomingAppointments: any[] = [];
 
 export default function Dashboard({ userRole = 'patient' }: DashboardProps) {
   const [personalMetrics] = useState({
-    patientsThisMonth: 47,
-    consultationsToday: 6,
-    avgRating: 4.8
+    patientsThisMonth: 0,
+    consultationsToday: 0,
+    avgRating: 0
   });
   
   const navigate = useNavigate();
@@ -55,11 +55,11 @@ export default function Dashboard({ userRole = 'patient' }: DashboardProps) {
               <>
                 <div className="flex items-center gap-2">
                   <span className="font-medium">Health Score:</span>
-                  <Badge variant="secondary" className="bg-white/20 text-white">85/100</Badge>
+                  <Badge variant="secondary" className="bg-white/20 text-white">0/100</Badge>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-medium">Streak:</span>
-                  <Badge variant="secondary" className="bg-white/20 text-white">7 days</Badge>
+                  <Badge variant="secondary" className="bg-white/20 text-white">0 days</Badge>
                 </div>
               </>
             )}
@@ -72,61 +72,6 @@ export default function Dashboard({ userRole = 'patient' }: DashboardProps) {
         </div>
       </div>
 
-      {/* Doctor Quick Actions */}
-      {userRole === 'doctor' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Upcoming Appointments Preview */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Upcoming Appointments</span>
-                <Button variant="ghost" size="sm" onClick={() => navigate('/doctor/schedule')}>
-                  View All <ChevronRight className="w-4 h-4 ml-1" />
-                </Button>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {upcomingAppointments.map((apt) => (
-                  <div key={apt.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <Clock className="w-4 h-4 text-muted-foreground" />
-                      <div>
-                        <p className="font-medium">{apt.patient}</p>
-                        <p className="text-sm text-muted-foreground">{apt.time} • {apt.type}</p>
-                      </div>
-                    </div>
-                    <Button size="sm" variant="outline">Join</Button>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Quick Links */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Links</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 gap-3">
-                <Button variant="outline" className="justify-start h-12" onClick={() => navigate('/doctor/schedule')}>
-                  <Calendar className="w-4 h-4 mr-3" />
-                  Go to Schedule
-                </Button>
-                <Button variant="outline" className="justify-start h-12" onClick={() => navigate('/doctor/patients')}>
-                  <UserCheck className="w-4 h-4 mr-3" />
-                  Review Patient Records
-                </Button>
-                <Button variant="outline" className="justify-start h-12">
-                  <Video className="w-4 h-4 mr-3" />
-                  Start Emergency Consultation
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
 
       {/* Quick Actions - Only for Patients */}
       {userRole === 'patient' && (
@@ -191,32 +136,32 @@ export default function Dashboard({ userRole = 'patient' }: DashboardProps) {
               <StatCard
                 title="Patients This Month"
                 value={personalMetrics.patientsThisMonth.toString()}
-                change="+12%"
-                changeType="positive"
+                change="0%"
+                changeType="neutral"
                 icon={Users}
                 gradient="bg-health-blue"
               />
               <StatCard
                 title="Today's Appointments"
                 value={personalMetrics.consultationsToday.toString()}
-                change="+3"
-                changeType="positive"
+                change="0"
+                changeType="neutral"
                 icon={Calendar}
                 gradient="bg-health-green"
               />
               <StatCard
                 title="Patient Rating"
                 value={`${personalMetrics.avgRating}/5`}
-                change="+0.2"
-                changeType="positive"
+                change="0"
+                changeType="neutral"
                 icon={Heart}
                 gradient="bg-health-purple"
               />
               <StatCard
                 title="Completion Rate"
-                value="97%"
-                change="+2%"
-                changeType="positive"
+                value="0%"
+                change="0%"
+                changeType="neutral"
                 icon={TrendingUp}
                 gradient="bg-health-orange"
               />
@@ -225,33 +170,33 @@ export default function Dashboard({ userRole = 'patient' }: DashboardProps) {
             <>
               <StatCard
                 title="Total Users"
-                value="1,247"
-                change="+12%"
-                changeType="positive"
+                value="0"
+                change="0%"
+                changeType="neutral"
                 icon={Users}
                 gradient="bg-health-blue"
               />
               <StatCard
                 title="Daily Active"
-                value="423"
-                change="+8%"
-                changeType="positive"
+                value="0"
+                change="0%"
+                changeType="neutral"
                 icon={TrendingUp}
                 gradient="bg-health-green"
               />
               <StatCard
                 title="Appointments"
-                value="89"
-                change="+15%"
-                changeType="positive"
+                value="0"
+                change="0%"
+                changeType="neutral"
                 icon={Calendar}
                 gradient="bg-health-purple"
               />
               <StatCard
                 title="System Health"
-                value="99.9%"
-                change="+0.1%"
-                changeType="positive"
+                value="100%"
+                change="0%"
+                changeType="neutral"
                 icon={Settings}
                 gradient="bg-health-orange"
               />
@@ -268,26 +213,8 @@ export default function Dashboard({ userRole = 'patient' }: DashboardProps) {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-health-blue rounded-full"></div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">New patient registration</p>
-                  <p className="text-xs text-muted-foreground">Sarah Wilson - 30 minutes ago</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-health-green rounded-full"></div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Consultation completed</p>
-                  <p className="text-xs text-muted-foreground">John Smith - 1 hour ago</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-health-orange rounded-full"></div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Lab results reviewed</p>
-                  <p className="text-xs text-muted-foreground">Mary Johnson - 2 hours ago</p>
-                </div>
+              <div className="text-center py-8 text-muted-foreground">
+                No recent activity to display.
               </div>
             </div>
           </CardContent>
@@ -302,13 +229,8 @@ export default function Dashboard({ userRole = 'patient' }: DashboardProps) {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-sm font-medium text-yellow-800">Storage Warning</p>
-                <p className="text-xs text-yellow-600">Database storage is at 85% capacity</p>
-              </div>
-              <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                <p className="text-sm font-medium text-green-800">Backup Complete</p>
-                <p className="text-xs text-green-600">Daily backup completed successfully</p>
+              <div className="text-center py-8 text-muted-foreground">
+                No system alerts at this time.
               </div>
             </div>
           </CardContent>
