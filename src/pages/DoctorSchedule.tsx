@@ -36,14 +36,7 @@ interface PatientInfo {
 const initialPatients: Record<string, PatientInfo> = {};
 
 const DoctorSchedule = () => {
-  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([
-    { id: 1, time: "09:00 AM", patient: "John Doe", type: "Consultation", status: "confirmed", meetingLink: "", notes: "Regular checkup for hypertension management", duration: 30 },
-    { id: 2, time: "10:00 AM", patient: "Available", type: "Open Slot", status: "available", meetingLink: "", duration: 30 },
-    { id: 3, time: "11:00 AM", patient: "Sarah Wilson", type: "Follow-up", status: "confirmed", meetingLink: "", notes: "Follow-up for asthma medication adjustment", duration: 15 },
-    { id: 4, time: "02:00 PM", patient: "Mike Johnson", type: "Consultation", status: "pending", meetingLink: "", notes: "Initial consultation for anxiety symptoms", duration: 45 },
-    { id: 5, time: "03:00 PM", patient: "Available", type: "Open Slot", status: "available", meetingLink: "", duration: 30 },
-    { id: 6, time: "04:00 PM", patient: "Emma Brown", type: "Consultation", status: "confirmed", meetingLink: "", notes: "Routine checkup and lab review", duration: 30 },
-  ]);
+  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   
   const [newSlotTime, setNewSlotTime] = useState("");
   const [newSlotDuration, setNewSlotDuration] = useState("30");

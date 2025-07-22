@@ -122,7 +122,7 @@ export function Sidebar({ userRole = 'patient', userName = 'User', collapsed = f
       {/* Settings & Logout */}
       <div className="p-4 border-t border-border space-y-2">
         <NavLink
-          to={userRole === 'doctor' ? '/doctor/settings' : userRole === 'admin' ? '/admin/settings' : '/settings'}
+          to="/settings"
           className={({ isActive }) =>
             cn(
               "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm",

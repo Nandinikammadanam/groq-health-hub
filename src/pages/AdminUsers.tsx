@@ -9,13 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from "@/hooks/use-toast";
 
 const AdminUsers = () => {
-  const [users, setUsers] = useState([
-    { id: 1, name: "Dr. Sarah Johnson", email: "sarah.johnson@healthmate.com", role: "doctor", status: "active", lastActive: "2 hours ago", phone: "+1-555-0123", location: "New York, NY" },
-    { id: 2, name: "John Doe", email: "john.doe@example.com", role: "patient", status: "active", lastActive: "5 minutes ago", phone: "+1-555-0124", location: "Los Angeles, CA" },
-    { id: 3, name: "Emma Wilson", email: "emma.wilson@example.com", role: "patient", status: "active", lastActive: "1 day ago", phone: "+1-555-0125", location: "Chicago, IL" },
-    { id: 4, name: "Dr. Michael Chen", email: "michael.chen@healthmate.com", role: "doctor", status: "pending", lastActive: "Never", phone: "+1-555-0126", location: "Houston, TX" },
-    { id: 5, name: "Sarah Brown", email: "sarah.brown@example.com", role: "patient", status: "inactive", lastActive: "1 week ago", phone: "+1-555-0127", location: "Phoenix, AZ" },
-  ]);
+  const [users, setUsers] = useState([]);
   
   const [newUser, setNewUser] = useState({
     name: "",
