@@ -175,6 +175,27 @@ export default function HealthRecords() {
 
     setLoading(true);
     try {
+      let fileUrl = null;
+      
+      // Upload file to Supabase Storage
+      if (selectedFile) {
+        const fileExt = selectedFile.name.split('.').pop();
+        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('medical-documents')
+          .upload(fileName, selectedFile);
+
+        if (uploadError) throw uploadError;
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('medical-documents')
+          .getPublicUrl(fileName);
+
+        fileUrl = publicUrl;
+      }
+
       // Create record in database
       const { data, error } = await supabase
         .from('medical_records')
@@ -184,7 +205,7 @@ export default function HealthRecords() {
           title: recordTitle,
           record_type: recordType,
           description: `Uploaded ${recordType} record: ${recordTitle}`,
-          file_url: null // You can implement file upload to Supabase Storage later
+          file_url: fileUrl
         })
         .select()
         .single();

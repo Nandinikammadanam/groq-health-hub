@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Heart, Activity, Thermometer, Scale, Eye, Stethoscope, Plus, TrendingUp, Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 interface VitalReading {
   id: string;
@@ -36,31 +39,124 @@ const vitalTypes = [
 ];
 
 export default function Vitals() {
-  const [vitals, setVitals] = useState<VitalReading[]>(initialVitals);
+  const [vitals, setVitals] = useState<VitalReading[]>([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [newVital, setNewVital] = useState({
     type: 'blood_pressure',
     value: '',
     notes: ''
   });
 
-  const handleAddVital = () => {
-    const vitalType = vitalTypes.find(v => v.type === newVital.type);
-    if (!vitalType || !newVital.value) return;
+  const { toast } = useToast();
+  const { user } = useAuth();
 
-    const vital: VitalReading = {
-      id: Date.now().toString(),
-      type: newVital.type as any,
-      value: newVital.value,
-      unit: vitalType.unit,
-      date: new Date().toISOString().split('T')[0],
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      notes: newVital.notes || undefined
+  // Load vitals from database
+  useEffect(() => {
+    if (user && user.role === 'patient') {
+      loadVitals();
+    }
+  }, [user]);
+
+  // Real-time subscriptions
+  useEffect(() => {
+    if (!user || user.role !== 'patient') return;
+
+    const vitalsChannel = supabase
+      .channel('vitals-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'vitals',
+          filter: `patient_id=eq.${user.id}`
+        },
+        () => {
+          loadVitals();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(vitalsChannel);
     };
+  }, [user]);
 
-    setVitals(prev => [vital, ...prev]);
-    setShowAddDialog(false);
-    setNewVital({ type: 'blood_pressure', value: '', notes: '' });
+  const loadVitals = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('vitals')
+        .select('*')
+        .eq('patient_id', user?.id)
+        .order('recorded_at', { ascending: false });
+
+      if (error) throw error;
+
+      const formattedVitals = data?.map(vital => ({
+        id: vital.id,
+        type: vital.type as VitalReading['type'],
+        value: vital.value.toString(),
+        unit: vital.unit,
+        date: vital.recorded_at.split('T')[0],
+        time: new Date(vital.recorded_at).toLocaleTimeString('en-US', { 
+          hour12: false, 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
+        notes: vital.notes || undefined
+      })) || [];
+
+      setVitals(formattedVitals);
+    } catch (error) {
+      console.error('Error loading vitals:', error);
+    }
+  };
+
+  const handleAddVital = async () => {
+    if (!newVital.value || !user) {
+      toast({
+        title: "Missing Information", 
+        description: "Please enter a value for the vital reading.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const vitalType = vitalTypes.find(v => v.type === newVital.type);
+      
+      const { error } = await supabase
+        .from('vitals')
+        .insert({
+          patient_id: user.id,
+          type: newVital.type as any,
+          value: parseFloat(newVital.value),
+          unit: vitalType?.unit || '',
+          notes: newVital.notes || null,
+          recorded_at: new Date().toISOString()
+        });
+
+      if (error) throw error;
+
+      setNewVital({ type: 'blood_pressure', value: '', notes: '' });
+      setShowAddDialog(false);
+      
+      toast({
+        title: "Vital Added",
+        description: "Your vital reading has been recorded successfully.",
+      });
+    } catch (error) {
+      console.error('Error adding vital:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add vital reading. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getLatestReading = (type: string) => {
@@ -151,8 +247,8 @@ export default function Vitals() {
                 />
               </div>
               
-              <Button onClick={handleAddVital} className="w-full">
-                Add Reading
+              <Button onClick={handleAddVital} className="w-full" disabled={loading}>
+                {loading ? "Adding..." : "Add Reading"}
               </Button>
             </div>
           </DialogContent>
