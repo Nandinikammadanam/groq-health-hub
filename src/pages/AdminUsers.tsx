@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Users, UserPlus, Search, Filter, Mail, Phone, MapPin, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,10 +7,17 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
-  
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    activePatients: 0,
+    activeDoctors: 0,
+    pendingApprovals: 0
+  });
   const [newUser, setNewUser] = useState({
     name: "",
     email: "",
@@ -21,9 +28,94 @@ const AdminUsers = () => {
   const [isAddingUser, setIsAddingUser] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
-  const addUser = () => {
+  // Load data from database
+  useEffect(() => {
+    if (user && user.role === 'admin') {
+      loadUsers();
+      loadStats();
+    }
+  }, [user]);
+
+  // Real-time subscriptions
+  useEffect(() => {
+    if (!user || user.role !== 'admin') return;
+
+    const usersChannel = supabase
+      .channel('profiles-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles'
+        },
+        () => {
+          loadUsers();
+          loadStats();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(usersChannel);
+    };
+  }, [user]);
+
+  const loadUsers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const formattedUsers = data?.map(profile => ({
+        id: profile.id,
+        name: profile.full_name,
+        email: profile.email,
+        role: profile.role,
+        phone: profile.phone,
+        location: profile.address,
+        status: 'active', // You can add a status field to the profiles table
+        lastActive: profile.updated_at ? new Date(profile.updated_at).toLocaleDateString() : 'Never'
+      })) || [];
+
+      setUsers(formattedUsers);
+    } catch (error) {
+      console.error('Error loading users:', error);
+    }
+  };
+
+  const loadStats = async () => {
+    try {
+      const { data: allUsers, error: usersError } = await supabase
+        .from('profiles')
+        .select('role');
+
+      if (usersError) throw usersError;
+
+      const totalUsers = allUsers?.length || 0;
+      const activePatients = allUsers?.filter(u => u.role === 'patient').length || 0;
+      const activeDoctors = allUsers?.filter(u => u.role === 'doctor').length || 0;
+      const pendingApprovals = 0; // You can implement pending approvals logic
+
+      setStats({
+        totalUsers,
+        activePatients,
+        activeDoctors,
+        pendingApprovals
+      });
+    } catch (error) {
+      console.error('Error loading stats:', error);
+    }
+  };
+
+  const addUser = async () => {
     if (!newUser.name || !newUser.email) {
       toast({
         title: "Missing Information",
@@ -33,21 +125,40 @@ const AdminUsers = () => {
       return;
     }
 
-    const user = {
-      ...newUser,
-      id: Date.now(),
-      status: "pending",
-      lastActive: "Never"
-    };
+    setLoading(true);
+    try {
+      // Create user via Supabase Auth (you would need to implement admin user creation)
+      // For now, just add to profiles table directly
+      const { error } = await supabase
+        .from('profiles')
+        .insert({
+          id: crypto.randomUUID(), // Generate a UUID for the id field
+          email: newUser.email,
+          full_name: newUser.name,
+          role: newUser.role as 'patient' | 'doctor' | 'admin',
+          phone: newUser.phone,
+          address: newUser.location
+        });
 
-    setUsers([...users, user]);
-    setNewUser({ name: "", email: "", role: "patient", phone: "", location: "" });
-    setIsAddingUser(false);
-    
-    toast({
-      title: "User Added",
-      description: "New user has been added successfully.",
-    });
+      if (error) throw error;
+
+      setNewUser({ name: "", email: "", role: "patient", phone: "", location: "" });
+      setIsAddingUser(false);
+      
+      toast({
+        title: "User Added",
+        description: "New user has been added successfully.",
+      });
+    } catch (error) {
+      console.error('Error adding user:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add user. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const updateUserStatus = (userId: number, newStatus: string) => {
@@ -152,8 +263,8 @@ const AdminUsers = () => {
                 />
               </div>
               <div className="flex gap-2">
-                <Button onClick={addUser} className="flex-1">
-                  Add User
+                <Button onClick={addUser} className="flex-1" disabled={loading}>
+                  {loading ? "Adding..." : "Add User"}
                 </Button>
                 <Button variant="outline" onClick={() => setIsAddingUser(false)} className="flex-1">
                   Cancel
@@ -171,8 +282,8 @@ const AdminUsers = () => {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,247</div>
-            <p className="text-xs text-muted-foreground">+12% from last month</p>
+            <div className="text-2xl font-bold">{stats.totalUsers}</div>
+            <p className="text-xs text-muted-foreground">Total registered users</p>
           </CardContent>
         </Card>
 
@@ -182,8 +293,8 @@ const AdminUsers = () => {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,089</div>
-            <p className="text-xs text-muted-foreground">+8% from last month</p>
+            <div className="text-2xl font-bold">{stats.activePatients}</div>
+            <p className="text-xs text-muted-foreground">Registered patients</p>
           </CardContent>
         </Card>
 
@@ -193,8 +304,8 @@ const AdminUsers = () => {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">158</div>
-            <p className="text-xs text-muted-foreground">+2 new this week</p>
+            <div className="text-2xl font-bold">{stats.activeDoctors}</div>
+            <p className="text-xs text-muted-foreground">Medical professionals</p>
           </CardContent>
         </Card>
 
@@ -204,7 +315,7 @@ const AdminUsers = () => {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">12</div>
+            <div className="text-2xl font-bold">{stats.pendingApprovals}</div>
             <p className="text-xs text-muted-foreground">Requires attention</p>
           </CardContent>
         </Card>

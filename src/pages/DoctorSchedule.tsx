@@ -10,6 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TimeSlot {
   id: number;
@@ -37,7 +39,8 @@ const initialPatients: Record<string, PatientInfo> = {};
 
 const DoctorSchedule = () => {
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
-  
+  const [appointments, setAppointments] = useState([]);
+  const [availableSlots, setAvailableSlots] = useState([]);
   const [newSlotTime, setNewSlotTime] = useState("");
   const [newSlotDuration, setNewSlotDuration] = useState("30");
   const [isAddingSlot, setIsAddingSlot] = useState(false);
@@ -48,8 +51,93 @@ const DoctorSchedule = () => {
   const [selectedSlots, setSelectedSlots] = useState<number[]>([]);
   const [activeCallTimer, setActiveCallTimer] = useState<{[key: number]: number}>({});
   const [aiSuggestions] = useState([]);
+  const [loading, setLoading] = useState(false);
   
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  // Load data from database
+  useEffect(() => {
+    if (user && user.role === 'doctor') {
+      loadAppointments();
+      loadAvailableSlots();
+    }
+  }, [user]);
+
+  // Real-time subscriptions
+  useEffect(() => {
+    if (!user || user.role !== 'doctor') return;
+
+    const appointmentsChannel = supabase
+      .channel('appointments-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'appointments',
+          filter: `doctor_id=eq.${user.id}`
+        },
+        () => {
+          loadAppointments();
+        }
+      )
+      .subscribe();
+
+    const slotsChannel = supabase
+      .channel('slots-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'available_slots',
+          filter: `doctor_id=eq.${user.id}`
+        },
+        () => {
+          loadAvailableSlots();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(appointmentsChannel);
+      supabase.removeChannel(slotsChannel);
+    };
+  }, [user]);
+
+  const loadAppointments = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('appointments')
+        .select(`
+          *,
+          patient:profiles!appointments_patient_id_fkey(*)
+        `)
+        .eq('doctor_id', user?.id)
+        .eq('appointment_date', new Date().toISOString().split('T')[0]);
+
+      if (error) throw error;
+      setAppointments(data || []);
+    } catch (error) {
+      console.error('Error loading appointments:', error);
+    }
+  };
+
+  const loadAvailableSlots = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('available_slots')
+        .select('*')
+        .eq('doctor_id', user?.id)
+        .eq('date', new Date().toISOString().split('T')[0]);
+
+      if (error) throw error;
+      setAvailableSlots(data || []);
+    } catch (error) {
+      console.error('Error loading available slots:', error);
+    }
+  };
 
   // Timer effect for active calls
   useEffect(() => {
@@ -66,8 +154,8 @@ const DoctorSchedule = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const addTimeSlot = () => {
-    if (!newSlotTime) {
+  const addTimeSlot = async () => {
+    if (!newSlotTime || !user) {
       toast({
         title: "Time Required",
         description: "Please enter a time for the new slot.",
@@ -76,25 +164,42 @@ const DoctorSchedule = () => {
       return;
     }
 
-    const newSlot: TimeSlot = {
-      id: Date.now(),
-      time: newSlotTime,
-      patient: "Available",
-      type: "Open Slot", 
-      status: "available",
-      meetingLink: "",
-      duration: parseInt(newSlotDuration)
-    };
+    setLoading(true);
+    try {
+      const [hours, minutes] = newSlotTime.split(':');
+      const endTime = new Date();
+      endTime.setHours(parseInt(hours), parseInt(minutes) + parseInt(newSlotDuration));
 
-    setTimeSlots([...timeSlots, newSlot]);
-    setNewSlotTime("");
-    setNewSlotDuration("30");
-    setIsAddingSlot(false);
-    
-    toast({
-      title: "Time Slot Added", 
-      description: "New time slot has been added to your schedule.",
-    });
+      const { error } = await supabase
+        .from('available_slots')
+        .insert({
+          doctor_id: user.id,
+          date: new Date().toISOString().split('T')[0],
+          start_time: newSlotTime,
+          end_time: `${endTime.getHours().toString().padStart(2, '0')}:${endTime.getMinutes().toString().padStart(2, '0')}`,
+          is_available: true
+        });
+
+      if (error) throw error;
+
+      setNewSlotTime("");
+      setNewSlotDuration("30");
+      setIsAddingSlot(false);
+      
+      toast({
+        title: "Time Slot Added", 
+        description: "New time slot has been added to your schedule.",
+      });
+    } catch (error) {
+      console.error('Error adding time slot:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add time slot. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const updateSlotStatus = (slotId: number, newStatus: string) => {
@@ -281,8 +386,8 @@ const DoctorSchedule = () => {
                   </Select>
                 </div>
                 <div className="flex gap-2">
-                  <Button onClick={addTimeSlot} className="flex-1">
-                    Add Slot
+                  <Button onClick={addTimeSlot} className="flex-1" disabled={loading}>
+                    {loading ? "Adding..." : "Add Slot"}
                   </Button>
                   <Button variant="outline" onClick={() => setIsAddingSlot(false)} className="flex-1">
                     Cancel
@@ -360,8 +465,10 @@ const DoctorSchedule = () => {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">6</div>
-            <p className="text-xs text-muted-foreground">4 confirmed, 1 pending</p>
+            <div className="text-2xl font-bold">{appointments.length}</div>
+            <p className="text-xs text-muted-foreground">
+              {appointments.filter(a => a.status === 'confirmed').length} confirmed, {appointments.filter(a => a.status === 'pending').length} pending
+            </p>
           </CardContent>
         </Card>
 
@@ -371,7 +478,7 @@ const DoctorSchedule = () => {
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">2</div>
+            <div className="text-2xl font-bold">{availableSlots.length}</div>
             <p className="text-xs text-muted-foreground">Open for booking</p>
           </CardContent>
         </Card>
@@ -382,7 +489,7 @@ const DoctorSchedule = () => {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">124</div>
+            <div className="text-2xl font-bold">{new Set(appointments.map(a => a.patient_id)).size}</div>
             <p className="text-xs text-muted-foreground">This month</p>
           </CardContent>
         </Card>

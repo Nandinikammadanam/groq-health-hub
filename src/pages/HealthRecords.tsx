@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { PatientCard } from "@/components/PatientCard";
+import { supabase } from "@/integrations/supabase/client";
 
 interface HealthRecord {
   id: string;
@@ -57,6 +58,7 @@ export default function HealthRecords() {
   const [filterType, setFilterType] = useState<string>("all");
   const [filterDate, setFilterDate] = useState("");
   const [showAddPatient, setShowAddPatient] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [newPatient, setNewPatient] = useState({
     name: "",
     age: "",
@@ -69,8 +71,100 @@ export default function HealthRecords() {
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const handleFileUpload = () => {
-    if (!selectedFile || !recordTitle) {
+  // Load data from database
+  useEffect(() => {
+    if (user) {
+      loadRecords();
+      if (user.role === 'doctor' || user.role === 'admin') {
+        loadPatients();
+      }
+    }
+  }, [user]);
+
+  // Real-time subscriptions
+  useEffect(() => {
+    if (!user) return;
+
+    const medicalRecordsChannel = supabase
+      .channel('medical-records-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'medical_records'
+        },
+        () => {
+          loadRecords();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(medicalRecordsChannel);
+    };
+  }, [user]);
+
+  const loadRecords = async () => {
+    try {
+      let query = supabase
+        .from('medical_records')
+        .select('*');
+
+      if (user?.role === 'patient') {
+        query = query.eq('patient_id', user.id);
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      const formattedRecords = data?.map(record => ({
+        id: record.id,
+        title: record.title,
+        type: record.record_type as HealthRecord['type'],
+        date: record.created_at.split('T')[0],
+        fileUrl: record.file_url,
+        summary: record.description,
+        provider: 'HealthMate AI'
+      })) || [];
+      
+      setRecords(formattedRecords);
+    } catch (error) {
+      console.error('Error loading records:', error);
+    }
+  };
+
+  const loadPatients = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('role', 'patient');
+
+      if (error) throw error;
+
+      const formattedPatients = data?.map(profile => ({
+        id: profile.id,
+        name: profile.full_name,
+        age: 0, // Calculate from date_of_birth if needed
+        gender: 'other' as const,
+        phone: profile.phone || '',
+        email: profile.email,
+        address: profile.address || '',
+        conditions: [],
+        lastVisit: new Date().toLocaleDateString(),
+        visits: []
+      })) || [];
+
+      setPatients(formattedPatients);
+    } catch (error) {
+      console.error('Error loading patients:', error);
+    }
+  };
+
+  const handleFileUpload = async () => {
+    if (!selectedFile || !recordTitle || !user) {
       toast({
         title: "Missing Information",
         description: "Please select a file and enter a title.",
@@ -79,23 +173,41 @@ export default function HealthRecords() {
       return;
     }
 
-    const newRecord: HealthRecord = {
-      id: Math.random().toString(36),
-      title: recordTitle,
-      type: recordType,
-      date: new Date().toISOString().split('T')[0],
-      fileUrl: URL.createObjectURL(selectedFile),
-      provider: 'Self-uploaded'
-    };
+    setLoading(true);
+    try {
+      // Create record in database
+      const { data, error } = await supabase
+        .from('medical_records')
+        .insert({
+          patient_id: user.id,
+          doctor_id: user.role === 'doctor' ? user.id : null,
+          title: recordTitle,
+          record_type: recordType,
+          description: `Uploaded ${recordType} record: ${recordTitle}`,
+          file_url: null // You can implement file upload to Supabase Storage later
+        })
+        .select()
+        .single();
 
-    setRecords([newRecord, ...records]);
-    setSelectedFile(null);
-    setRecordTitle("");
-    
-    toast({
-      title: "Record uploaded successfully",
-      description: "Your health record has been added.",
-    });
+      if (error) throw error;
+
+      setSelectedFile(null);
+      setRecordTitle("");
+      
+      toast({
+        title: "Record uploaded successfully",
+        description: "Your health record has been added.",
+      });
+    } catch (error) {
+      console.error('Error uploading record:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload record. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getTypeColor = (type: HealthRecord['type']) => {
@@ -374,8 +486,8 @@ export default function HealthRecords() {
               />
             </div>
 
-            <Button onClick={handleFileUpload} className="w-full">
-              Upload Record
+            <Button onClick={handleFileUpload} className="w-full" disabled={loading}>
+              {loading ? "Uploading..." : "Upload Record"}
             </Button>
           </CardContent>
         </Card>
